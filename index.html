@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIWIWORLD Akademi - Büyük Mezuniyet Sınavı Simülasyonu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            siwi: { dark: '#0f172a', accent: '#6366f1', gold: '#f59e0b' }
+          },
+          fontFamily: { display: ['Segoe UI', 'system-ui', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="css/game.css" />
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white font-display antialiased">
+
+  <div id="app" class="max-w-6xl mx-auto px-4 py-6 md:py-10">
+    <!-- Zaten oynanmış ekranı -->
+    <section id="screen-already-played" class="screen hidden">
+      <div class="glass-card max-w-lg mx-auto text-center p-8 md:p-12 animate-fade-in">
+        <div class="text-5xl mb-4">🔒</div>
+        <h1 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4">Katılım Hakkınız Tükenmiştir</h1>
+        <p class="text-slate-300 mb-6">Bu sınava yalnızca bir kez katılabilirsiniz. Daha önce tamamladığınız sınav kaydınız sistemde mevcut.</p>
+        <p id="already-played-discount" class="text-lg text-indigo-200 bg-indigo-900/50 rounded-xl p-4"></p>
+      </div>
+    </section>
+
+    <!-- Giriş ekranı -->
+    <section id="screen-start" class="screen">
+      <div class="grid lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2">
+          <header class="mb-8 animate-fade-in">
+            <p class="text-indigo-400 text-sm font-semibold tracking-widest uppercase mb-2">SIWIWORLD Akademi</p>
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+              Büyük Mezuniyet Sınavı Simülasyonu
+            </h1>
+          </header>
+          <div class="glass-card p-6 md:p-8 mb-6 animate-slide-up">
+            <p class="text-slate-300 leading-relaxed text-sm md:text-base">
+              SIWIWORLD Akademi'ye hoş geldin! Bu oyun, akademimizden başarıyla mezun olan uzmanların finalde karşılaştığı
+              pratik zeka ve kriz yönetimi sınavının birebir simülasyonudur. Eğer dijital pazarlama reflekslerine güveniyorsan,
+              bu 5 soruluk kritik testi tamamla. Göstereceğin başarıya göre, eğitimlerimize katılımda kullanabileceğin büyük
+              akademisyen indirimleri ve sürpriz ödüller kazanacaksın! Unutma, bu sınavı sadece <strong class="text-amber-400">1 KERE</strong>
+              oynama hakkın var ve zaman hızla akıyor!
+            </p>
+          </div>
+          <form id="start-form" class="glass-card p-6 md:p-8 space-y-5 animate-slide-up delay-1" novalidate>
+            <h2 class="text-xl font-semibold text-indigo-200">Mezun Aday Kayıt Formu</h2>
+            <div>
+              <label for="input-name" class="block text-sm text-slate-400 mb-1">Ad Soyad</label>
+              <input type="text" id="input-name" name="name" required autocomplete="name"
+                class="input-field" placeholder="Adınız ve soyadınız" />
+            </div>
+            <div>
+              <label for="input-phone" class="block text-sm text-slate-400 mb-1">Telefon</label>
+              <input type="tel" id="input-phone" name="phone" required autocomplete="tel"
+                class="input-field" placeholder="05XX XXX XX XX" />
+            </div>
+            <div>
+              <label for="input-email" class="block text-sm text-slate-400 mb-1">E-posta</label>
+              <input type="email" id="input-email" name="email" required autocomplete="email"
+                class="input-field" placeholder="ornek@email.com" />
+            </div>
+            <button type="submit" id="btn-start" disabled
+              class="w-full py-4 rounded-xl font-bold text-lg transition-all btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
+              Sınava Başla →
+            </button>
+          </form>
+        </div>
+        <aside class="lg:col-span-1">
+          <div id="leaderboard-start" class="leaderboard-panel h-full"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Oyun ekranı -->
+    <section id="screen-game" class="screen hidden">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <span id="question-progress" class="text-sm font-semibold text-indigo-300 bg-indigo-900/60 px-4 py-2 rounded-full">Soru 1/5</span>
+            <span id="score-display" class="text-sm font-semibold text-emerald-400">Skor: 0</span>
+          </div>
+          <div class="timer-wrap mb-6">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-orange-400 font-medium">Süre</span>
+              <span id="timer-seconds" class="text-red-400 font-bold tabular-nums">30</span>
+            </div>
+            <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
+              <div id="timer-bar" class="timer-bar h-full rounded-full transition-all duration-1000 linear"></div>
+            </div>
+          </div>
+          <div class="glass-card p-6 md:p-8 min-h-[280px]">
+            <p id="question-text" class="text-lg md:text-xl leading-relaxed mb-8"></p>
+            <div id="options-container" class="space-y-3"></div>
+          </div>
+        </div>
+        <aside class="lg:col-span-1 hidden lg:block">
+          <div id="leaderboard-game" class="leaderboard-panel"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Sonuç ekranı -->
+    <section id="screen-result" class="screen hidden">
+      <div class="glass-card max-w-2xl mx-auto text-center p-8 md:p-12 animate-fade-in">
+        <div id="result-badge" class="text-6xl mb-4"></div>
+        <h1 id="result-title" class="text-2xl md:text-3xl font-bold mb-4"></h1>
+        <p id="result-message" class="text-slate-300 leading-relaxed mb-6 text-left md:text-center"></p>
+        <p id="result-stats" class="text-indigo-300 text-sm mb-8"></p>
+        <div id="result-discount-box" class="bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 rounded-xl p-6 mb-6">
+          <p class="text-xs uppercase tracking-wider text-amber-400 mb-2">İndirim Kodunuz</p>
+          <p id="result-code" class="text-3xl font-mono font-bold text-amber-300 tracking-widest"></p>
+        </div>
+        <p class="text-sm text-slate-500">Formda bıraktığınız bilgiler üzerinden eğitim danışmanımız sizinle iletişime geçecektir.</p>
+      </div>
+    </section>
+  </div>
+
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
