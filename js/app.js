@@ -5,6 +5,27 @@ import { ExamGame } from './game.js';
 
 const screens = ['start', 'game', 'result', 'already-played'];
 
+function isValidPhone(phone) {
+  let digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('0090')) digits = digits.slice(4);
+  else if (digits.startsWith('090')) digits = digits.slice(3);
+  else if (digits.startsWith('90') && digits.length >= 12) digits = digits.slice(2);
+  if (digits.startsWith('0') && digits.length >= 11) digits = digits.slice(1);
+  return digits.length >= 10;
+}
+
+function bindFormValidation(run) {
+  const ids = ['input-name', 'input-phone', 'input-email'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    ['input', 'change', 'blur', 'keyup'].forEach((ev) => el.addEventListener(ev, run));
+  });
+  run();
+  requestAnimationFrame(run);
+  [100, 500, 1500].forEach((ms) => setTimeout(run, ms));
+}
+
 const ui = {
   showScreen(name) {
     screens.forEach((s) => {
@@ -14,12 +35,13 @@ const ui = {
   },
 
   validateForm() {
-    const name = document.getElementById('input-name').value.trim();
-    const phone = document.getElementById('input-phone').value.trim();
-    const email = document.getElementById('input-email').value.trim();
+    const name = document.getElementById('input-name')?.value.trim() ?? '';
+    const phone = document.getElementById('input-phone')?.value.trim() ?? '';
+    const email = document.getElementById('input-email')?.value.trim() ?? '';
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const validPhone = phone.replace(/\D/g, '').length >= 10;
+    const validPhone = isValidPhone(phone);
     const btn = document.getElementById('btn-start');
+    if (!btn) return false;
     const ok = name.length >= 2 && validPhone && validEmail;
     btn.disabled = !ok;
     return ok;
@@ -130,9 +152,7 @@ function init() {
   }
 
   const form = document.getElementById('start-form');
-  ['input-name', 'input-phone', 'input-email'].forEach((id) => {
-    document.getElementById(id).addEventListener('input', () => ui.validateForm());
-  });
+  bindFormValidation(() => ui.validateForm());
 
   const game = new ExamGame(ui);
 
@@ -147,7 +167,6 @@ function init() {
     game.start(player);
   });
 
-  ui.validateForm();
 }
 
 document.addEventListener('DOMContentLoaded', init);
